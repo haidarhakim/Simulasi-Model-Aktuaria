@@ -1,0 +1,238 @@
+---
+title: "Prak7SMA_Haidar_G5402221039"
+author: "Adhan Haidar Hakim"
+date: "2025-10-01"
+output: word_document
+---
+
+![](images/Screenshot 2025-10-01 143731.png)
+
+```{r}
+#1.Estimasi fungsi Gammadgn pengintegralan Crude Monte Carlo.  
+#1.a. ngitung ukuran contoh (n) dengan error gak lebih dari 0.001 satuan, dengan selang kepercayaan 95%. 
+
+set.seed(11)
+# Parameter yang diketahui
+c_val <- 1.96
+E_val <- 0.001
+m_initial <- 1000 # Ukuran sampel awal
+
+# Membangkitkan sampel awal dari sebaran Seragam(0,1)
+y_initial <- runif(m_initial)
+
+# Menghitung g(y)
+g_y_initial <- 1 / sqrt(-log(y_initial))
+
+# Menghitung dugaan ragam (sigma^2)
+sigma2_duga <- var(g_y_initial)
+print(paste("Dugaan Ragam (sigma^2):", sigma2_duga))
+
+#ngitung ukuran sample 
+n_required <- (c_val^2 * sigma2_duga) / (E_val^2)
+print(paste("Ukuran Sampel yang Dibutuhkan (n):", n_required))
+
+```
+
+````{r}
+#1.b itung nilai pendugaan dengan set.seed dan juga errornya. jgn lupda dibulatin contoh sampkle yg diitung ke bil bulat terdekat diatasnya. 
+
+set.seed(12)
+
+# Ukuran sampel final (pembulatan ke atas)
+n_final <- 1938019
+# Membangkitkan sampel final dari sebaran Seragam(0,1)
+y_final <- runif(n_final)
+# Menghitung g(y) untuk sampel final
+g_y_final <- 1 / sqrt(-log(y_final))
+# Menghitung nilai dugaan theta
+theta_duga <- mean(g_y_final)
+print(paste("Nilai Dugaan (theta_duga):", theta_duga))
+
+# Nilai theta sebenarnya adalah sqrt(pi)
+theta_true <- sqrt(pi)
+print(paste("Nilai Sebenarnya (sqrt(pi)):", theta_true))
+
+# Menghitung error absolut
+error_abs <- abs(theta_duga - theta_true)
+print(paste("Error Absolut:", error_abs))
+````
+
+2\.
+
+![](images/Screenshot 2025-10-01 143937.png)
+
+```{r}
+
+#2 Estimasi Integral fungsi normal
+
+#2.a ngitung ukuran sample dgn error gak lebih dari 0.001 satuan, pad tingkat kepercayaan. 
+set.seed(21)
+
+# Parameter
+c_val <- 1.96
+E_val <- 0.001
+m_initial <- 1000
+
+# Membangkitkan sampel awal U(0,1)
+x_initial <- runif(m_initial)
+
+# Menghitung g(x) menggunakan fungsi dnorm (FKP Normal Standar)
+g_x_initial <- dnorm(x_initial, mean = 0, sd = 1)
+
+# Menghitung dugaan ragam (sigma^2)
+sigma2_hat_2a <- var(g_x_initial)
+print(paste("Dugaan Ragam (sigma^2):", sigma2_hat_2a))
+
+# Menghitung ukuran sampel yang dibutuhkan
+n_required_2a <- (c_val^2 * sigma2_hat_2a) / (E_val^2)
+print(paste("Ukuran Sampel yang Dibutuhkan (n):", n_required_2a))
+```
+
+```{r}
+#2.b estimasi dengan CMC 
+# 2.b Estimasi dengan CMC
+
+set.seed(22)
+
+# Ukuran sampel final (dibulatkan ke atas genap)
+n_final_2b <- 20632
+
+# Membangkitkan sampel final U(0,1)
+x_final_2b <- runif(n_final_2b)
+
+# Menghitung g(x)
+g_x_final_2b <- dnorm(x_final_2b)
+
+# Menghitung nilai dugaan theta
+theta_hat_2b <- mean(g_x_final_2b)
+print(paste("Nilai Dugaan CMC (theta_hat):", theta_hat_2b))
+
+# Menghitung ragam PENDUGA
+var_estimator_2b <- var(g_x_final_2b) / n_final_2b
+print(paste("Ragam Penduga CMC:", var_estimator_2b))
+
+# Nilai sebenarnya adalah pnorm(1) - pnorm(0)
+theta_true_2b <- pnorm(1) - pnorm(0)
+print(paste("Nilai Sebenarnya:", theta_true_2b))
+
+# Menghitung error
+error_2b <- abs(theta_hat_2b - theta_true_2b)
+print(paste("Error Absolut:", error_2b))
+```
+
+```{r}
+#2.c Estimasi dgn metode kedua (rumus lain)
+# 2.c Estimasi dengan metode kedua
+
+set.seed(23)
+
+# Ukuran n/2
+n_half_2c <- 10316
+n_final_2c <- 20632
+
+# Membangkitkan sampel u sebanyak n/2
+u_2c <- runif(n_half_2c)
+
+# Menghitung H(u) sesuai rumus di soal
+H_u <- (exp(-u_2c^2 / 2) * (1 + exp(-0.5 + u_2c))) / sqrt(2 * pi)
+
+# Menghitung nilai dugaan theta
+# Estimatornya adalah (1/n) * sum(H(u)) = (1/2) * mean(H(u))
+theta_hat_2c <- sum(H_u) / n_final_2c
+print(paste("Nilai Dugaan Metode Kedua (theta_hat):", theta_hat_2c))
+
+# Menghitung ragam PENDUGA
+# Var(theta_hat) = Var( (1/2) * mean(H(u)) ) = (1/4) * Var(H(u)) / (n/2)
+var_estimator_2c <- (1/4) * var(H_u) / n_half_2c
+print(paste("Ragam Penduga Metode Kedua:", var_estimator_2c))
+
+```
+
+```{r}
+#2.d
+# 2.d Menghitung Efisiensi
+
+efisiensi <- var_estimator_2b / var_estimator_2c
+print(paste("Efisiensi:", efisiensi))
+```
+
+Interpretasi:
+
+Nilai efisien 13.094 menunjukkan bahwa pada bagian (c) 13x lebih efisien daripada metode Crude Monte Carlo (CmC) di bagian b.
+
+dengan tingkat akurasi yg sama, jawaban c butuh ukuran sample 13x lebih sedikit dibandingkan dengan CMC
+
+3\.
+
+![](images/Screenshot 2025-10-01 144000.png)
+
+```{r}
+#3. Estimasi Peluang Sebaran Lognormal
+# 3.a Estimasi dengan CMC
+
+set.seed(31)
+
+n_3a <- 1000
+
+# Membangkitkan sampel y ~ U(0,1)
+y_3a <- runif(n_3a)
+
+# Transformasi y ke x
+x_3a <- 1 + y_3a
+
+# Menghitung g(y) = f(x)
+g_y_3a <- dlnorm(x_3a, meanlog = 0, sdlog = 1)
+
+# Nilai dugaan theta
+theta_hat_3a <- mean(g_y_3a)
+print(paste("Nilai Dugaan CMC:", theta_hat_3a))
+
+# Ragam PENDUGA CMC
+var_estimator_3a <- var(g_y_3a) / n_3a
+print(paste("Ragam Penduga CMC:", var_estimator_3a))
+
+# ngitung Selang Kepercayaan 95%
+c_val <- 1.96
+margin_error <- c_val * sqrt(var_estimator_3a)
+lower_bound <- theta_hat_3a - margin_error
+upper_bound <- theta_hat_3a + margin_error
+print(paste("Selang Kepercayaan 95%:", paste("(", lower_bound, ",", upper_bound, ")")))
+```
+
+```{r}
+#3.b. Estimasi dgn peubah acak Antitesis make 1000 nilai sample tuk duga thetha = Pr (1 < X < 2 ) dan juga duga ragam penduganya. 
+
+
+set.seed(32)
+
+n_pairs <- 500
+
+# Membangkitkan n/2 sampel awal
+u_3b <- runif(n_pairs)
+# Membuat pasangan antitesisnya
+v_3b <- 1 - u_3b
+
+# Transformasi u dan v ke domain x
+x1_3b <- 1 + u_3b
+x2_3b <- 1 + v_3b
+
+# Menghitung g(u) dan g(v)
+g1 <- dlnorm(x1_3b, meanlog = 0, sdlog = 1)
+g2 <- dlnorm(x2_3b, meanlog = 0, sdlog = 1)
+
+# Gabungkan hasil untuk estimator antitesis
+g_anti <- (g1 + g2) / 2
+
+# Nilai dugaan theta antitesis
+theta_hat_3b <- mean(g_anti)
+print(paste("Nilai Dugaan Antitesis:", theta_hat_3b))
+
+# Ragam PENDUGA Antitesis
+var_estimator_3b <- var(g_anti) / n_pairs
+print(paste("Ragam Penduga Antitesis:", var_estimator_3b))
+
+# Menghitung efisiensi
+efisiensi_3b <- var_estimator_3a / var_estimator_3b
+print(paste("Efisiensi Antitesis vs CMC:", efisiensi_3b))
+
+```
